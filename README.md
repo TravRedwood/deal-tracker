@@ -113,7 +113,6 @@ deal-tracker/
 | Layer | Technology | Why |
 |---|---|---|
 | Web framework | Flask | Lightweight, easy to self-host or deploy |
-| Database | SQLite | Zero-config, portable, right-sized for single-user scale |
 | Browser automation | Playwright | Best-in-class headless browser, handles JS rendering |
 | Scheduling | APScheduler | In-process scheduler, no separate worker needed |
 | Email | SMTP via Gmail | Simple, no third-party dependency |
