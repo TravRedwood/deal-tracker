@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deal Tracker</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9fafb;color:#111827;font-size:14px}
+  .nav{background:#1c1c1a;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px}
+  .nav-title{font-size:15px;font-weight:600;color:#f9fafb}
+  .nav-links{display:flex;gap:8px;align-items:center}
+  .nav-links a{font-size:13px;color:#9ca3af;text-decoration:none;padding:5px 10px;border-radius:6px}
+  .nav-links a:hover{background:#2c2c2a;color:#f9fafb}
+  .nav-links a.active{color:#f9fafb}
+  .main{max-width:960px;margin:0 auto;padding:24px 16px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+  .metric{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px}
+  .metric-val{font-size:24px;font-weight:600;color:#111827}
+  .metric-lbl{font-size:11px;color:#6b7280;margin-top:3px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+  select,input[type=text]{font-size:13px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#111827;height:34px}
+  button{font-size:13px;padding:6px 14px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#111827;cursor:pointer;height:34px}
+  button:hover{background:#f3f4f6}
+  .btn-dark{background:#1c1c1a;color:#f9fafb;border-color:#1c1c1a}
+  .btn-dark:hover{background:#2c2c2a}
+  .tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid #e5e7eb}
+  .tab{font-size:13px;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:#111827;font-weight:500;border-bottom-color:#111827}
+  .listing-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:8px}
+  .listing-card.high-match{border-left:3px solid #059669}
+  .listing-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .listing-title{font-size:15px;font-weight:600;color:#111827;margin:0 0 3px}
+  .listing-meta{font-size:12px;color:#6b7280}
+  .badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+  .badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
+  .badge-new{background:#d1fae5;color:#065f46}
+  .badge-hot{background:#fee2e2;color:#991b1b}
+  .badge-watch{background:#ede9fe;color:#5b21b6}
+  .score-badge{font-size:11px;padding:2px 7px;border-radius:4px;font-weight:600}
+  .score-high{background:#d1fae5;color:#065f46}
+  .score-mid{background:#dbeafe;color:#1e40af}
+  .score-low{background:#fef3c7;color:#92400e}
+  .listing-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .stat{font-size:12px;color:#6b7280}
+  .stat strong{color:#111827}
+  .listing-desc{font-size:12px;color:#6b7280;border-left:2px solid #e5e7eb;padding-left:8px;margin-bottom:8px}
+  .listing-flags{font-size:12px;color:#991b1b;margin-bottom:6px}
+  .listing-actions{display:flex;gap:6px;flex-wrap:wrap;padding-top:8px;border-top:1px solid #f3f4f6}
+  .listing-actions button{height:28px;font-size:12px;padding:0 10px}
+  .listing-actions a{font-size:12px;color:#1d4ed8;text-decoration:none;padding:0 10px;height:28px;display:flex;align-items:center;border:1px solid #e5e7eb;border-radius:6px}
+  .notes-box{width:100%;font-size:12px;padding:6px 8px;border:1px solid #e5e7eb;border-radius:6px;margin-top:6px;resize:vertical;min-height:60px;display:none}
+  .empty{text-align:center;color:#6b7280;padding:40px;font-size:14px}
+  .toast{position:fixed;bottom:20px;right:20px;background:#1c1c1a;color:#f9fafb;padding:10px 16px;border-radius:8px;font-size:13px;display:none;z-index:999}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-title">Deal Tracker</span>
+  <div class="nav-links">
+    <a href="/" class="active">Listings</a>
+    <a href="/settings">Settings</a>
+    <a href="/logout">Sign out</a>
+  </div>
+</nav>
+<div class="main">
+  <div class="metrics">
+    <div class="metric"><div class="metric-val" id="m-total">{{ total }}</div><div class="metric-lbl">Total listings</div></div>
+    <div class="metric"><div class="metric-val" id="m-new">{{ new_today }}</div><div class="metric-lbl">New today</div></div>
+    <div class="metric"><div class="metric-val" id="m-strong">{{ strong }}</div><div class="metric-lbl">Strong matches</div></div>
+    <div class="metric"><div class="metric-val" id="m-watch">{{ watchlisted }}</div><div class="metric-lbl">Watchlisted</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('all',this)">All listings</button>
+    <button class="tab" onclick="setTab('strong',this)">Strong matches</button>
+    <button class="tab" onclick="setTab('watchlist',this)">Watchlist</button>
+    <button class="tab" onclick="setTab('flagged',this)">Flagged</button>
+  </div>
+
+  <div class="controls">
+    <select id="filterType" onchange="loadListings()">
+      <option value="all">All types</option>
+      <option value="Home services">Home services</option>
+      <option value="Staffing agency">Staffing agency</option>
+      <option value="Laundromat">Laundromat</option>
+      <option value="Nail salon">Nail salon</option>
+      <option value="Quick service restaurant">QSR</option>
+      <option value="Route-based distribution">Route distribution</option>
+    </select>
+    <select id="filterSort" onchange="loadListings()">
+      <option value="score">Best match</option>
+      <option value="newest">Newest first</option>
+      <option value="price_asc">Price: low to high</option>
+      <option value="price_desc">Price: high to low</option>
+      <option value="revenue">Highest revenue</option>
+    </select>
+    <button class="btn-dark" onclick="triggerScrape()" id="scrape-btn">Run scraper now</button>
+  </div>
+
+  <div id="listings-container"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let currentTab = 'all';
+
+function setTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadListings();
+}
+
+function fmt(val) {
+  if (!val) return 'N/A';
+  if (val >= 1000000) return '$' + (val/1000000).toFixed(1) + 'M';
+  if (val >= 1000) return '$' + Math.round(val/1000) + 'K';
+  return '$' + val.toLocaleString();
+}
+
+function scoreClass(s) {
+  return s >= 80 ? 'score-high' : s >= 60 ? 'score-mid' : 'score-low';
+}
+
+function loadListings() {
+  const type = document.getElementById('filterType').value;
+  const sort = document.getElementById('filterSort').value;
+  fetch(`/api/listings?type=${type}&sort=${sort}&tab=${currentTab}`)
+    .then(r => r.json())
+    .then(listings => {
+      const el = document.getElementById('listings-container');
+      if (!listings.length) {
+        el.innerHTML = '<div class="empty">No listings found for these filters.</div>';
+        return;
+      }
+      el.innerHTML = listings.map(l => {
+        const flags = (l.flags || []).map(f => `<div class="listing-flags">⚠ ${f}</div>`).join('');
+        const ph = l.price_history || [];
+        const priceDrop = ph.length ? ` <span style="font-size:11px;color:#92400e">(was ${fmt(ph[ph.length-1].price)})</span>` : '';
+        const badgeHtml = l.watchlisted ? '<span class="badge badge-watch">Watching</span>' : '';
+        return `<div class="listing-card ${l.match_score >= 80 ? 'high-match' : ''}" id="card-${l.id}">
+          <div class="listing-header">
+            <div>
+              <p class="listing-title">${l.title}</p>
+              <p class="listing-meta">${l.business_type} · ${l.location || 'US'} · via ${l.source}</p>
+            </div>
+            <div class="badges">
+              ${badgeHtml}
+              <span class="score-badge ${scoreClass(l.match_score)}">${l.match_score}% match</span>
+            </div>
+          </div>
+          <div class="listing-stats">
+            <span class="stat"><strong>${fmt(l.asking_price)}</strong> asking${priceDrop}</span>
+            <span class="stat"><strong>${fmt(l.annual_revenue)}</strong> revenue</span>
+            <span class="stat"><strong>${l.profit_margin || 'N/A'}%</strong> margin</span>
+            ${l.sde ? '<span class="stat"><strong>SDE listed</strong></span>' : ''}
+            ${l.financials_verified ? '<span class="stat"><strong>✓ Verified</strong></span>' : ''}
+            ${l.days_on_market ? `<span class="stat"><strong>${l.days_on_market}</strong> days on market</span>` : ''}
+          </div>
+          ${l.description ? `<div class="listing-desc">${l.description.slice(0,200)}...</div>` : ''}
+          ${flags}
+          ${l.notes ? `<div style="font-size:12px;color:#374151;background:#f9fafb;padding:6px 8px;border-radius:6px;margin-bottom:6px">📝 ${l.notes}</div>` : ''}
+          <textarea class="notes-box" id="notes-${l.id}" placeholder="Add notes...">${l.notes || ''}</textarea>
+          <div class="listing-actions">
+            <a href="${l.url}" target="_blank">View listing →</a>
+            <button onclick="toggleWatch('${l.id}')" id="watch-${l.id}">${l.watchlisted ? 'Unwatch' : 'Watch'}</button>
+            <button onclick="toggleNotes('${l.id}')">Notes</button>
+            <button onclick="saveNotes('${l.id}')">Save notes</button>
+          </div>
+        </div>`;
+      }).join('');
+    });
+}
+
+function toggleWatch(id) {
+  fetch(`/api/listings/${id}/watch`, {method:'POST'})
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById(`watch-${id}`).textContent = data.watchlisted ? 'Unwatch' : 'Watch';
+      showToast(data.watchlisted ? 'Added to watchlist' : 'Removed from watchlist');
+    });
+}
+
+function toggleNotes(id) {
+  const box = document.getElementById(`notes-${id}`);
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveNotes(id) {
+  const notes = document.getElementById(`notes-${id}`).value;
+  fetch(`/api/listings/${id}/notes`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({notes})
+  }).then(() => showToast('Notes saved'));
+}
+
+function triggerScrape() {
+  const btn = document.getElementById('scrape-btn');
+  btn.textContent = 'Scraping...';
+  btn.disabled = true;
+  fetch('/api/scrape', {method:'POST'})
+    .then(r => r.json())
+    .then(data => {
+      btn.textContent = 'Run scraper now';
+      btn.disabled = false;
+      showToast(`Done — ${data.new} new listings found`);
+      loadListings();
+    });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+loadListings();
+</script>
+</body>
+</html>

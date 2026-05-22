@@ -1,0 +1,35 @@
+{
+  "filters": {
+    "price_min": 100000,
+    "price_max": 500000,
+    "revenue_min": 150000,
+    "margin_min": 15,
+    "franchise_max_investment": 200000,
+    "days_on_market_flag": 180,
+    "price_to_revenue_flag": 1.5
+  },
+  "keywords": {
+    "Home services": ["HVAC", "pest control", "cleaning services", "plumbing", "home services"],
+    "Staffing agency": ["staffing agency", "temp agency", "recruiting firm", "workforce solutions"],
+    "Route-based distribution": ["vending route", "linen service", "distribution route", "beverage route"],
+    "Laundromat": ["laundromat", "coin laundry", "self-service laundry"],
+    "Nail salon": ["nail salon", "beauty salon", "nail studio", "spa"],
+    "Quick service restaurant": ["QSR", "fast casual", "food franchise", "quick service restaurant"]
+  },
+  "sources": {
+    "bizbuysell": true,
+    "bizquest": true,
+    "acquire": true,
+    "flippa": true,
+    "sunbelt": true
+  },
+  "digest": {
+    "frequency": "weekly",
+    "day": "monday",
+    "time": "08:00"
+  },
+  "recipients": [
+    {"email": "you@example.com", "name": "Your Name", "role": "owner"},
+    {"email": "partner@example.com", "name": "Partner", "role": "full"}
+  ]
+    }

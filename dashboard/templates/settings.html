@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Settings — Deal Tracker</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9fafb;color:#111827;font-size:14px}
+  .nav{background:#1c1c1a;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px}
+  .nav-title{font-size:15px;font-weight:600;color:#f9fafb}
+  .nav-links{display:flex;gap:8px}
+  .nav-links a{font-size:13px;color:#9ca3af;text-decoration:none;padding:5px 10px;border-radius:6px}
+  .nav-links a:hover{background:#2c2c2a;color:#f9fafb}
+  .nav-links a.active{color:#f9fafb}
+  .main{max-width:800px;margin:0 auto;padding:24px 16px}
+  .section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:20px 24px;margin-bottom:16px}
+  .section-title{font-size:15px;font-weight:600;color:#111827;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .field-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f3f4f6}
+  .field-row:last-of-type{border-bottom:none}
+  .field-label{font-size:13px;color:#374151}
+  .field-sub{font-size:11px;color:#9ca3af;margin-top:2px}
+  input[type=number],input[type=text],select{font-size:13px;padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#111827;width:160px;height:32px}
+  .toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0;position:absolute}
+  .slider{position:absolute;inset:0;background:#d1d5db;border-radius:20px;cursor:pointer;transition:background .2s}
+  .slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .2s}
+  input:checked+.slider{background:#059669}
+  input:checked+.slider:before{transform:translateX(16px)}
+  .kw-section{margin-top:8px}
+  .kw-category{margin-bottom:16px}
+  .kw-category-title{font-size:12px;color:#6b7280;font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em}
+  .kw-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+  .kw-tag{display:flex;align-items:center;gap:4px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:3px 8px;font-size:12px;font-family:monospace}
+  .kw-remove{background:none;border:none;cursor:pointer;color:#9ca3af;font-size:14px;padding:0;line-height:1}
+  .kw-remove:hover{color:#dc2626}
+  .kw-add-row{display:flex;gap:6px}
+  .kw-add-row input{flex:1;width:auto;font-family:monospace}
+  .kw-add-row button{height:32px;padding:0 12px}
+  button{font-size:13px;padding:6px 14px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#111827;cursor:pointer;height:34px}
+  button:hover{background:#f3f4f6}
+  .btn-dark{background:#1c1c1a;color:#f9fafb;border-color:#1c1c1a;height:34px}
+  .btn-dark:hover{background:#2c2c2a}
+  .btn-danger{background:#fff;color:#dc2626;border-color:#fecaca}
+  .btn-danger:hover{background:#fef2f2}
+  .recipient-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f3f4f6}
+  .recipient-row:last-child{border-bottom:none}
+  .recipient-info .name{font-size:13px;font-weight:500;color:#111827}
+  .recipient-info .email{font-size:12px;color:#6b7280}
+  .add-recipient{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .add-recipient input{width:auto;flex:1;min-width:140px}
+  .toast{position:fixed;bottom:20px;right:20px;background:#1c1c1a;color:#f9fafb;padding:10px 16px;border-radius:8px;font-size:13px;display:none;z-index:999}
+  .save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e7eb;padding:12px 0;margin-top:16px;display:flex;justify-content:flex-end;gap:8px}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-title">Deal Tracker</span>
+  <div class="nav-links">
+    <a href="/">Listings</a>
+    <a href="/settings" class="active">Settings</a>
+    <a href="/logout">Sign out</a>
+  </div>
+</nav>
+<div class="main">
+
+  <div class="section">
+    <p class="section-title">Financial filters</p>
+    <div class="field-row">
+      <div><div class="field-label">Min asking price</div><div class="field-sub">Listings below this are ignored</div></div>
+      <input type="number" id="price_min" value="{{ config.filters.price_min }}" step="10000">
+    </div>
+    <div class="field-row">
+      <div><div class="field-label">Max asking price</div></div>
+      <input type="number" id="price_max" value="{{ config.filters.price_max }}" step="10000">
+    </div>
+    <div class="field-row">
+      <div><div class="field-label">Min annual revenue</div></div>
+      <input type="number" id="revenue_min" value="{{ config.filters.revenue_min }}" step="10000">
+    </div>
+    <div class="field-row">
+      <div><div class="field-label">Min profit margin (%)</div></div>
+      <input type="number" id="margin_min" value="{{ config.filters.margin_min }}" step="1">
+    </div>
+    <div class="field-row">
+      <div><div class="field-label">Max franchise investment</div><div class="field-sub">Franchises above this are excluded</div></div>
+      <input type="number" id="franchise_max" value="{{ config.filters.franchise_max_investment }}" step="10000">
+    </div>
+    <div class="field-row">
+      <div><div class="field-label">Days-on-market flag</div><div class="field-sub">Flag listings older than this</div></div>
+      <input type="number" id="dom_flag" value="{{ config.filters.days_on_market_flag }}" step="10">
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">Sources</p>
+    {% for source, enabled in config.sources.items() %}
+    <div class="field-row">
+      <div class="field-label">{{ source | capitalize }}</div>
+      <label class="toggle">
+        <input type="checkbox" id="src-{{ source }}" {% if enabled %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section">
+    <p class="section-title">Keywords by business type</p>
+    <div class="kw-section" id="kw-section">
+      {% for category, kws in config.keywords.items() %}
+      <div class="kw-category" data-category="{{ category }}">
+        <div class="kw-category-title">{{ category }}</div>
+        <div class="kw-tags">
+          {% for kw in kws %}
+          <span class="kw-tag">{{ kw }}<button class="kw-remove" onclick="removeKw(this,'{{ category }}','{{ kw }}')">×</button></span>
+          {% endfor %}
+        </div>
+        <div class="kw-add-row">
+          <input type="text" placeholder="Add keyword..." class="kw-input">
+          <button onclick="addKw(this,'{{ category }}')">Add</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">Digest schedule</p>
+    <div class="field-row">
+      <div class="field-label">Frequency</div>
+      <select id="digest_freq">
+        <option value="weekly" {% if config.digest.frequency=='weekly' %}selected{% endif %}>Weekly</option>
+        <option value="daily" {% if config.digest.frequency=='daily' %}selected{% endif %}>Daily</option>
+        <option value="biweekly" {% if config.digest.frequency=='biweekly' %}selected{% endif %}>Every 2 weeks</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field-label">Send on</div>
+      <select id="digest_day">
+        {% for day in ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] %}
+        <option value="{{ day }}" {% if config.digest.day==day %}selected{% endif %}>{{ day | capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">Recipients</p>
+    <div id="recipient-list">
+      {% for r in recipients %}
+      <div class="recipient-row" id="recip-{{ loop.index }}">
+        <div class="recipient-info">
+          <div class="name">{{ r.name or 'Unnamed' }}</div>
+          <div class="email">{{ r.email }}</div>
+        </div>
+        <button class="btn-danger" onclick="removeRecipient('{{ r.email }}',this)" style="height:28px;font-size:12px;padding:0 10px">Remove</button>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="add-recipient" style="margin-top:12px">
+      <input type="text" id="new-name" placeholder="Name">
+      <input type="text" id="new-email" placeholder="Email address">
+      <button onclick="addRecipient()">Add recipient</button>
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <button onclick="sendTestDigest()">Send test digest</button>
+    <button class="btn-dark" onclick="saveAll()">Save all settings</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let keywords = {{ config.keywords | tojson }};
+
+function removeKw(btn, category, kw) {
+  keywords[category] = keywords[category].filter(k => k !== kw);
+  btn.closest('.kw-tag').remove();
+}
+
+function addKw(btn, category) {
+  const input = btn.previousElementSibling;
+  const val = input.value.trim();
+  if (!val) return;
+  if (!keywords[category]) keywords[category] = [];
+  keywords[category].push(val);
+  const tagsEl = btn.closest('.kw-category').querySelector('.kw-tags');
+  const tag = document.createElement('span');
+  tag.className = 'kw-tag';
+  tag.innerHTML = `${val}<button class="kw-remove" onclick="removeKw(this,'${category}','${val}')">×</button>`;
+  tagsEl.appendChild(tag);
+  input.value = '';
+}
+
+function buildConfig() {
+  const sources = {};
+  document.querySelectorAll('[id^=src-]').forEach(el => {
+    sources[el.id.replace('src-','')] = el.checked;
+  });
+  return {
+    filters: {
+      price_min: parseInt(document.getElementById('price_min').value),
+      price_max: parseInt(document.getElementById('price_max').value),
+      revenue_min: parseInt(document.getElementById('revenue_min').value),
+      margin_min: parseInt(document.getElementById('margin_min').value),
+      franchise_max_investment: parseInt(document.getElementById('franchise_max').value),
+      days_on_market_flag: parseInt(document.getElementById('dom_flag').value),
+      price_to_revenue_flag: 1.5,
+    },
+    keywords, sources,
+    digest: {
+      frequency: document.getElementById('digest_freq').value,
+      day: document.getElementById('digest_day').value,
+      time: '08:00',
+    }
+  };
+}
+
+function saveAll() {
+  fetch('/api/config', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(buildConfig())
+  }).then(r => r.json()).then(() => showToast('Settings saved'));
+}
+
+function addRecipient() {
+  const name = document.getElementById('new-name').value.trim();
+  const email = document.getElementById('new-email').value.trim();
+  if (!email) return;
+  fetch('/api/recipients', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name, email, role:'full'})
+  }).then(r => r.json()).then(d => {
+    if (d.error) { showToast(d.error); return; }
+    const list = document.getElementById('recipient-list');
+    list.insertAdjacentHTML('beforeend', `
+      <div class="recipient-row">
+        <div class="recipient-info">
+          <div class="name">${name || 'Unnamed'}</div>
+          <div class="email">${email}</div>
+        </div>
+        <button class="btn-danger" onclick="removeRecipient('${email}',this)" style="height:28px;font-size:12px;padding:0 10px">Remove</button>
+      </div>`);
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-email').value = '';
+    showToast('Recipient added');
+  });
+}
+
+function removeRecipient(email, btn) {
+  fetch('/api/recipients', {
+    method:'DELETE', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email})
+  }).then(() => {
+    btn.closest('.recipient-row').remove();
+    showToast('Recipient removed');
+  });
+}
+
+function sendTestDigest() {
+  fetch('/api/send-digest', {method:'POST'})
+    .then(r => r.json())
+    .then(d => showToast(d.ok ? 'Test digest sent!' : 'Error: ' + d.error));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+</script>
+</body>
+</html>
